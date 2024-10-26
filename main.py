@@ -217,3 +217,4 @@ if __name__ == "__main__":
     for user in users:
         send_message(user, access_token, region, weather_day_text, weather_day_icon, weather_night_text, weather_night_icon, temp_max, temp_min, note_ch1, note_ch2, note_en1, note_en2, note_de1, note_de2)
     os.system("pause")
+ message = "这是一条简单的推送消息。"

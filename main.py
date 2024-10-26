@@ -1,8 +1,13 @@
+#用于发送 HTTP 请求以获取数据和向微信接口发送消息
 from requests import get, post
+#用于系统交互和错误处理，比如在出现错误时暂停程序并输出错误信息。
 import sys, os
+#用于处理日期和时间相关的操作，如获取当前日期、计算日期差值等。
 from datetime import datetime, date
+#用于获取本地时间信息
 from time import localtime
 
+#作用：从微信公众平台获取访问令牌（access_token）。
 def get_access_token():
     app_id = config["app_id"]
     app_secret = config["app_secret"]
@@ -16,7 +21,14 @@ def get_access_token():
         sys.exit(1)
     return access_token
 
+#作用：获取指定地区的天气信息。
 def get_weather(region):
+    #实现方式：首先，使用和风天气的城市查询接口，
+    # 根据传入的地区名和 API 密钥构建 URL，发送请求获取城市信息。
+    # 如果响应状态码为404，表示地区名有误；如果为401，
+    # 表示和风天气的 API 密钥不正确。否则，从响应中提取城市 ID。
+    # 然后，使用城市 ID 和 API 密钥再次构建 URL，向和风天气的天气接口发送请求，
+    # 获取该地区的天气信息，包括白天和晚上的天气描述、图标以及最高和最低温度。
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
@@ -44,6 +56,10 @@ def get_weather(region):
     temp_min = response["daily"][0]["tempMin"] + u"\N{DEGREE SIGN}" + "C"
     return weather_day_text, weather_day_icon, weather_night_text, weather_night_icon, temp_max, temp_min
 
+#作用：计算给定日期距离当前日期的天数。
+# 实现方式：将输入的日期字符串解析为年、月、日，
+# 根据当前日期与给定日期的大小关系，确定下一个该日期的时间，
+# 然后计算两个日期之间的天数差。
 def get_day_left(day, year, today):
     day_year = day.split("-")[0]
     day_month = int(day.split("-")[1])
@@ -59,6 +75,10 @@ def get_day_left(day, year, today):
     if day_left == "0:00:00": day_left = 0
     return day_left
 
+#作用：从金山词霸获取每日一句的英文和中文内容，并进行分割。
+# 实现方式：向金山词霸的 API 发送请求，获取响应的 JSON 数据，
+# 提取其中的 “content”（英文句子）和 “note”（中文翻译），
+# 然后将它们分别平均分割为两部分。
 def get_ciba():
     url = "http://open.iciba.com/dsapi/"
     headers = {
@@ -77,8 +97,10 @@ def get_ciba():
     note_ch2 = note_ch[middle_ch:]
     return note_en1, note_en2, note_ch1, note_ch2
 
+#作用：向指定的微信用户发送模板消息。
 def send_message(to_user, access_token, region_name, weather_day_text, weather_day_icon, weather_night_text, weather_night_icon, temp_max, temp_min, note_ch1, note_ch2, note_en1, note_en2, note_de1, note_de2):
     url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
+    #日期
     week_list = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
     year = localtime().tm_year
     month = localtime().tm_mon
